@@ -54,6 +54,8 @@ Kassi::Application.routes.draw do
   get '/' => 'homepage#index', as: :homepage_without_locale
   root :to => 'homepage#index'
 
+  get "/topbar" => "application#topbar_properties"
+
   # Work in progress:
   # Uncomment these and comment the three homepage routes above to test the landing page
   # get '/:locale/' => 'landing_page#index', :constraints => { :locale => locale_matcher }
