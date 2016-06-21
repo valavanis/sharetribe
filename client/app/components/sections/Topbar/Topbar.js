@@ -41,7 +41,7 @@ const avatarDropdownProps = (avatarDropdown, customColor, username, routes) => {
 const LABEL_TYPE_MENU = 'menu';
 const LABEL_TYPE_DROPDOWN = 'dropdown';
 
-const SEARCH_ENABLED = false;
+const SEARCH_ENABLED = true;
 
 const profileLinks = function profileLinks(username, router, location, customColor) {
   if (username) {
@@ -175,6 +175,8 @@ const currentSearchParams = (searchQuery) => {
   }, {});
 };
 
+const isValid = (value) => typeof value === 'number' && !isNaN(value) || !!value;
+
 const createQuery = (searchParams) => {
   const extraParams = currentSearchParams(window.location.search);
   const params = { ...extraParams, ...searchParams };
@@ -183,8 +185,12 @@ const createQuery = (searchParams) => {
 
   return Object.keys(params).reduce((url, key) => {
     const val = params[key];
-    const value = (val == null) ? '' : encodeURIComponent(val);
-    return `${url}${url ? '&' : '?'}${key}=${value}`;
+
+    if (!isValid(val)) {
+      return url;
+    }
+
+    return `${url}${url ? '&' : '?'}${key}=${encodeURIComponent(val)}`;
   }, '');
 };
 
@@ -287,6 +293,8 @@ class Topbar extends Component {
           mode: this.props.search.mode,
           keywordPlaceholder: this.props.search.keyword_placeholder,
           locationPlaceholder: this.props.search.location_placeholder,
+          keywordQuery: this.props.search.keyword_query,
+          locationQuery: this.props.search.location_query,
           onSubmit: ({ keywordQuery, locationQuery, place }) => {
             console.log({ // eslint-disable-line no-console
               keywordQuery,
@@ -297,13 +305,14 @@ class Topbar extends Component {
             });
             const query = createQuery({
               q: keywordQuery,
+              lq: locationQuery,
               lc: coordinates(place),
-              ls: 'OK', // TODO: is this relevant?
               boundingbox: viewport(place),
               distance_max: maxDistance(place),
             });
-            console.log('new query string:', query);
-            window.location.assign(query);
+            const searchUrl = `${this.props.search_path}${query}`;
+            console.log('Search URL:', `"${searchUrl}"`);
+            window.location.assign(searchUrl);
           },
         }) :
         null,
@@ -338,6 +347,7 @@ const { string, object, shape, arrayOf } = PropTypes;
 Topbar.propTypes = {
   logo: object.isRequired,
   search: object,
+  search_path: PropTypes.string.isRequired,
   avatarDropdown: object,
   menu: shape({
     links: arrayOf(shape({
