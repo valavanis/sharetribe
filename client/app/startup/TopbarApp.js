@@ -1,5 +1,6 @@
 import r from 'r-dom';
 import { initialize as initializeI18n } from '../utils/i18n';
+
 import Topbar from '../components/sections/Topbar/Topbar';
 import { subset } from '../utils/routes';
 
